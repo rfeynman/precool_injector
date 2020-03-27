@@ -1,0 +1,213 @@
+#ecooling dc gun  emittance vs bunch length
+#
+
+
+
+GPTLICENSE =1233690964;
+#pp("section",section);
+#@sections 0
+
+
+#@var sol00Field 0.005 -1 1
+#@var R 0.5e-3 2e-3 5e-3 
+#xvar b0field -0.01 -1 1
+#xvar b1field 0.01 -1 1
+
+
+
+#-------------------------------------------------
+#Space charge parameter
+#-------------------------------------------------
+total_charge = -5e-9;
+space_charge = 1;
+space_charge_type = 1;
+Alpha  = 1.2;   # 1.2    (manual default is 1.0), (bigger is better)
+Fn     = 0.25;  # 0.25   (manual default is 0.5), (smaller is better)
+verror = 0.005; # 0.005  (manual default is 0.01), (smaller is better)
+Nstd   = 12;    # 12     (manual default is 5), (bigger is better)
+
+if (space_charge == 1) {
+     if (space_charge_type == 0) {
+     setcharge2Dcircle("beam", total_charge);
+         spacecharge2Dcircle();
+     }
+     if (space_charge_type == 1) {
+         spacecharge3Dmesh("Cathode", "MeshNfac", Alpha, "MeshAdapt", Fn, "SolverAcc", verror, "MeshBoxSize", Nstd);
+     }
+ }
+
+dosave=2;
+#------------------------------------------------------------------------
+# ACCURACY AND INTEGRATION PARAMETERS
+#--------------------------------------------------------------------------
+RadiusMax = 0.04;
+GBacc =  5.5;
+xacc  =  6.5;
+accuracy(GBacc, xacc);
+dtmin = 1e-15;
+dtmax = 1e-11;   # orig
+#--------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+# ELEMENTS:
+#-------------:----------------------------------------------------------
+#1 DC GUN
+if(1)
+{
+gun_voltage= 450;
+Zdcgun = 0.15; #from 13.44->50
+Maxdcgun  = 500.0;
+Edcgun    = gun_voltage / Maxdcgun;
+Map2D_E("wcs", "z", Zdcgun, "/home/wange/Project/GPT/gpt322mpi-rhel65/mybeamline/field/gunfield/lfield/dcgun_cornell.gdf", "R", "Z", "Er", "Ez", Edcgun);
+}
+
+#------------------------
+#Solenoid
+#=============================
+ sol00z=0.373762;
+ sol00en =0.487665 ;
+
+
+
+
+#---------------------------------------
+#test beamline
+#----------------------------------------
+
+map2D_B("wcs","z",sol00z,"/home/wange/Project/GPT/gpt322mpi-rhel65/mybeamline/field/solenoid/sol.gdf","R", "Z", "Br", "Bz",sol00en);
+
+#-------------------------
+#initial
+#-------------------------------
+#if(section==0)
+if(1)
+{
+
+  Npart =5000;
+  # Npart = 50000;
+
+    setparticles("beam", Npart, me, qe, total_charge);
+
+    mc2 = m*c*c/abs(qe);
+    KE = 0.4;
+    G  = 1+KE/mc2 ;
+    pp("mc2", mc2);
+    pp("KE", KE);
+    pp("G", G);
+    setGdist( "beam", "u", G, 0);
+
+     R =4.35307e-03  ;
+
+    setrxydist("beam","u", R/2, R);
+    setphidist("beam","u", 0,2*pi);
+    
+     Toff = 0.0;
+    tt=1.40626e+00;
+
+    Tlength = tt*1e-9;  # 1 ns
+    #Tlength = 10 * 2. /360./ 703.75e6;  # yes 80 ps
+    settdist("beam","u",Toff,Tlength);
+
+    kT = 0.13;
+    sigmagb = sqrt(kT/mc2);
+    en = (R/2)*sigmagb;
+    pp("en",en);
+    pp("sigmagb",sigmagb);
+    setGBxdist("beam","g",0,sigmagb,5,5);
+    setGBydist("beam","g",0,sigmagb,5,5);
+
+        xoffset=0.000;#0.006
+    yoffset=0.000;
+    setxoffset("beam",xoffset);
+    setyoffset("beam",yoffset);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#----------------------------------
+#detector
+#-----------------------------------
+
+
+endt=8e-9; #6.4
+#snapshot(0,endt,0.1e-9);
+Tlength=1.5e-9;
+if(0)
+{
+tout(-Tlength/2,2.77e-9,0.2e-10);
+}
+else if(1)
+{
+tout(-Tlength/2,endt,0.2e-10);
+
+}
+
+
+outputvalue("wcs",1);
+#@goal wcs n 0 emit4d 0 10 0
+
+screen("wcs","I",0.00);
+screen("wcs","I",0.01);
+screen("wcs","I",0.02);
+screen("wcs","I",0.03);
+screen("wcs","I",0.05);
+screen("wcs","I",0.07);
+screen("wcs","I",0.09);
+screen("wcs","I",0.11);
+screen("wcs","I",0.13);
+screen("wcs","I",0.15);
+screen("wcs","I",0.18);
+screen("wcs","I",0.20);
+screen("wcs","I",0.25);
+screen("wcs","I",0.30);
+screen("wcs","I",0.35);
+screen("wcs","I",0.40);
+screen("wcs","I",0.45);
+screen("wcs","I",0.50);
+screen("wcs","I",0.55);
+screen("wcs","I",0.60);
+screen("wcs","I",0.65);
+screen("wcs","I",0.70);
+screen("wcs","I",0.75);
+screen("wcs","I",0.80);
+screen("wcs","I",0.85);
+screen("wcs","I",0.90);
+screen("wcs","I",0.95);
+screen("wcs","I",1.05);
+screen("wcs","I",1.15);
+screen("wcs","I",1.20);
+screen("wcs","I",1.25);
+screen("wcs","I",1.35);
+screen("wcs","I",1.40);
+screen("wcs","I",1.45);
+#screen("wcs","I",screenpos);
+#screen("wcs","I",1.55);
+#sreen("wcs","I",1.60);
+#screen("wcs","I",1.65);
+#screen("wcs","I",1.70);
+#screen("wcs","I",1.75);
+#screen("wcs","I",1.80);
+#screen("wcs","I",1.85);
+#screen("wcs","I",1.90);
+
+tmax=endt;
+pp(endt);
